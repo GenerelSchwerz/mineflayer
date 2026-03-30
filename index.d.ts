@@ -157,8 +157,8 @@ export interface BotEvents {
   teamCreated: (team: Team) => Promise<void> | void
   teamRemoved: (team: Team) => Promise<void> | void
   teamUpdated: (team: Team) => Promise<void> | void
-  teamMemberAdded: (team: Team) => Promise<void> | void
-  teamMemberRemoved: (team: Team) => Promise<void> | void
+  teamMemberAdded: (team: Team, members: string[]) => Promise<void> | void
+  teamMemberRemoved: (team: Team, members: string[]) => Promise<void> | void
   bossBarCreated: (bossBar: BossBar) => Promise<void> | void
   bossBarDeleted: (bossBar: BossBar) => Promise<void> | void
   bossBarUpdated: (bossBar: BossBar) => Promise<void> | void
