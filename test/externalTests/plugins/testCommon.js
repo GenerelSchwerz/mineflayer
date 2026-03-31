@@ -1,6 +1,7 @@
 const { Vec3 } = require('vec3')
 
 const { spawn } = require('child_process')
+const { logExternal } = require('../../common/externalLog')
 const { once } = require('../../../lib/promise_utils')
 const process = require('process')
 const assert = require('assert')
@@ -9,11 +10,30 @@ const { sleep, onceWithCleanup } = require('../../../lib/promise_utils')
 const timeout = 20000
 module.exports = inject
 
-function inject (bot) {
-  console.log(bot.version)
+function inject (bot, options = {}) {
+  const botId = options.id ?? bot.username
+  logExternal('bot', `[bot ${botId}] version ${bot.version}`)
+
+  const defaultGroundY = bot.supportFeature('tallWorld') ? -60 : 4
+  const defaultOrigin = options.origin ? new Vec3(options.origin.x, options.origin.y, options.origin.z) : new Vec3(0, defaultGroundY, 0)
+  const defaultWorkspaceSize = options.workspaceSize ?? 48
+  const defaultWorkspaceRadius = options.workspaceRadius ?? 8
+  let workspaceIdCounter = 0
 
   bot.test = {}
-  bot.test.groundY = bot.supportFeature('tallWorld') ? -60 : 4
+  bot.test.id = options.id ?? bot.username
+  bot.test.groundY = defaultGroundY
+  bot.test.origin = defaultOrigin
+  bot.test.workspaceSize = defaultWorkspaceSize
+  bot.test.workspaceRadius = defaultWorkspaceRadius
+  bot.test.defaultExampleOffset = options.defaultExampleOffset ?? new Vec3(10, 0, 0)
+  bot.test.configureWorkspace = configureWorkspace
+  bot.test.toWorld = toWorld
+  bot.test.teleportHome = teleportHome
+  bot.test.command = command
+  bot.test.commandSelf = commandSelf
+  bot.test.makeEntityName = makeEntityName
+  bot.test.makeChildUsername = makeChildUsername
   bot.test.sayEverywhere = sayEverywhere
   bot.test.clearInventory = clearInventory
   bot.test.becomeSurvival = becomeSurvival
@@ -30,6 +50,12 @@ function inject (bot) {
     return new Promise((resolve) => { setTimeout(resolve, ms) })
   }
 
+  configureWorkspace({
+    origin: defaultOrigin,
+    workspaceSize: defaultWorkspaceSize,
+    workspaceRadius: defaultWorkspaceRadius
+  })
+
   bot.test.awaitItemReceived = async (command) => {
     const p = once(bot.inventory, 'updateSlot')
     bot.chat(command)
@@ -37,12 +63,12 @@ function inject (bot) {
   }
   // setting relative to true makes x, y, & z relative using ~
   bot.test.setBlock = async ({ x = 0, y = 0, z = 0, relative, blockName }) => {
-    const { x: _x, y: _y, z: _z } = relative ? bot.entity.position.floored().offset(x, y, z) : { x, y, z }
-    const block = bot.blockAt(new Vec3(_x, _y, _z))
+    const position = relative ? bot.entity.position.floored().offset(x, y, z) : new Vec3(x, y, z)
+    const block = bot.blockAt(position)
     if (block.name === blockName) {
       return
     }
-    const p = once(bot.world, `blockUpdate:(${_x}, ${_y}, ${_z})`)
+    const p = once(bot.world, `blockUpdate:(${position.x}, ${position.y}, ${position.z})`)
     const prefix = relative ? '~' : ''
     bot.chat(`/setblock ${prefix}${x} ${prefix}${y} ${prefix}${z} ${blockName}`)
     await p
@@ -69,9 +95,13 @@ function inject (bot) {
 
   async function resetBlocksToSuperflat () {
     const groundY = 4
+    const minX = Math.floor(bot.test.origin.x - bot.test.workspaceRadius)
+    const maxX = Math.floor(bot.test.origin.x + bot.test.workspaceRadius)
+    const minZ = Math.floor(bot.test.origin.z - bot.test.workspaceRadius)
+    const maxZ = Math.floor(bot.test.origin.z + bot.test.workspaceRadius)
     for (let y = groundY + 4; y >= groundY - 1; y--) {
       const realY = y + bot.test.groundY - 4
-      bot.chat(`/fill ~-5 ${realY} ~-5 ~5 ${realY} ~5 ` + layerNames[y])
+      bot.chat(`/fill ${minX} ${realY} ${minZ} ${maxX} ${realY} ${maxZ} ${layerNames[y]}`)
     }
     await bot.test.wait(100)
   }
@@ -85,14 +115,22 @@ function inject (bot) {
 
   // always leaves you in creative mode
   async function resetState () {
+    logExternal('trace', `[trace ${bot.username}] resetState: start`)
     await becomeCreative()
+    logExternal('trace', `[trace ${bot.username}] resetState: creative enabled`)
     await clearInventory()
+    logExternal('trace', `[trace ${bot.username}] resetState: inventory cleared (pass 1)`)
     bot.creative.startFlying()
-    await teleport(new Vec3(0, bot.test.groundY, 0))
+    await teleportHome()
+    logExternal('trace', `[trace ${bot.username}] resetState: teleport complete ${bot.entity.position.floored().x},${bot.entity.position.floored().y},${bot.entity.position.floored().z}`)
     await bot.waitForChunksToLoad()
+    logExternal('trace', `[trace ${bot.username}] resetState: chunks loaded`)
     await resetBlocksToSuperflat()
+    logExternal('trace', `[trace ${bot.username}] resetState: workspace reset`)
     await sleep(1000)
     await clearInventory()
+    logExternal('trace', `[trace ${bot.username}] resetState: inventory cleared (pass 2)`)
+    logExternal('trace', `[trace ${bot.username}] resetState: complete`)
   }
 
   async function becomeCreative () {
@@ -117,16 +155,16 @@ function inject (bot) {
     })
 
     // do it three times to ensure that we get feedback
-    bot.chat(`/gamemode ${getGM(value)}`)
-    bot.chat(`/gamemode ${getGM(!value)}`)
-    bot.chat(`/gamemode ${getGM(value)}`)
+    bot.chat(`/gamemode ${getGM(value)} ${bot.username}`)
+    bot.chat(`/gamemode ${getGM(!value)} ${bot.username}`)
+    bot.chat(`/gamemode ${getGM(value)} ${bot.username}`)
     return msgProm
   }
 
   async function clearInventory () {
     const giveStone = onceWithCleanup(bot.inventory, 'updateSlot', { timeout: 1000 * 20, checkCondition: (slot, oldItem, newItem) => newItem?.name === 'stone' })
     await bot.test.wait(500)
-    bot.chat('/give @a stone 1')
+    bot.chat(`/give ${bot.username} stone 1`)
     bot.inventory.on('updateSlot', (...e) => {
       // console.log('inventory.updateSlot', e)
     })
@@ -136,7 +174,7 @@ function inject (bot) {
       timeout,
       checkCondition: msg => msg.translate === 'commands.clear.success.single' || msg.translate === 'commands.clear.success'
     })
-    bot.chat('/clear') // don't rely on the message (as it'll come to early), wait for the result of /clear instead
+    bot.chat(`/clear ${bot.username}`) // don't rely on the message (as it'll come too early), wait for the result of /clear instead
     await clearInv
 
     // Check that the inventory is clear
@@ -164,8 +202,50 @@ function inject (bot) {
   }
 
   function sayEverywhere (message) {
+    logExternal('bot', `[bot ${bot.username}] ${message}`)
     bot.chat(message)
-    console.log(message)
+  }
+
+  function configureWorkspace ({ origin, workspaceSize, workspaceRadius } = {}) {
+    if (origin) {
+      bot.test.origin = new Vec3(origin.x, origin.y, origin.z)
+    }
+    if (workspaceSize !== undefined) {
+      bot.test.workspaceSize = workspaceSize
+    }
+    if (workspaceRadius !== undefined) {
+      bot.test.workspaceRadius = workspaceRadius
+    }
+    bot.test.groundY = bot.test.origin.y
+  }
+
+  function toWorld (x = 0, y = 0, z = 0) {
+    return bot.test.origin.offset(x, y, z)
+  }
+
+  function teleportHome () {
+    return teleport(bot.test.origin.clone())
+  }
+
+  function command (rawCommand) {
+    bot.chat(rawCommand)
+  }
+
+  function commandSelf (commandPrefix, args = '') {
+    const suffix = args ? ` ${args}` : ''
+    bot.chat(`/${commandPrefix} ${bot.username}${suffix}`)
+  }
+
+  function makeEntityName (prefix = 'test') {
+    const suffix = `${workspaceIdCounter++}`.padStart(2, '0')
+    return `${prefix}_${bot.test.id}_${suffix}`.slice(0, 64)
+  }
+
+  function makeChildUsername (prefix = 'child') {
+    const cleanPrefix = prefix.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 8) || 'child'
+    const cleanId = `${bot.test.id}`.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 4) || 'bot'
+    const suffix = `${workspaceIdCounter++}`.toString(36).slice(-2)
+    return `${cleanPrefix}${cleanId}${suffix}`.slice(0, 16)
   }
 
   async function fly (delta) {
@@ -183,20 +263,27 @@ function inject (bot) {
     return chatMessagePromise
   }
 
-  async function runExample (file, run) {
+  async function runExample (file, run, options = {}) {
     let childBotName
+    const childTarget = options.targetPosition
+      ? options.targetPosition.clone()
+      : bot.test.toWorld(
+        bot.test.defaultExampleOffset.x,
+        bot.test.defaultExampleOffset.y,
+        bot.test.defaultExampleOffset.z
+      )
+    const requestedName = options.username ?? bot.test.makeChildUsername(options.namePrefix ?? file.split('/').pop().replace(/\.js$/, ''))
 
     const detectChildJoin = async () => {
       const [message] = await onceWithCleanup(bot, 'message', {
-        checkCondition: message => message.json.translate === 'multiplayer.player.joined'
+        checkCondition: message => message.json.translate === 'multiplayer.player.joined' && message.json.with[0].insertion === requestedName
       })
       childBotName = message.json.with[0].insertion
-      bot.chat(`/tp ${childBotName} 50 ${bot.test.groundY} 0`)
+      bot.chat(`/tp ${childBotName} ${childTarget.x} ${childTarget.y} ${childTarget.z}`)
       // Wait for the child entity to arrive at the teleport target,
       // confirming the server has processed the TP
-      const targetPos = new Vec3(50, bot.test.groundY, 0)
       while (!bot.players[childBotName]?.entity ||
-             bot.players[childBotName].entity.position.distanceTo(targetPos) > 5) {
+             bot.players[childBotName].entity.position.distanceTo(childTarget) > 5) {
         await sleep(100)
       }
       // Let the child's physics engine initialize at the new position
@@ -207,12 +294,12 @@ function inject (bot) {
 
     const runExampleOnReady = async () => {
       await onceWithCleanup(bot, 'chat', {
-        checkCondition: (username, message) => message === 'Ready!'
+        checkCondition: (username, message) => username === requestedName && message === 'Ready!'
       })
       return run(childBotName)
     }
 
-    const child = spawn('node', [file, '127.0.0.1', `${bot.test.port}`])
+    const child = spawn('node', [file, '127.0.0.1', `${bot.test.port}`, requestedName])
 
     // Useful to debug child processes:
     child.stdout.on('data', (data) => { console.log(`${data}`) })
@@ -248,7 +335,7 @@ function inject (bot) {
   }
 
   function selfKill () {
-    bot.chat('/kill @p')
+    bot.chat(`/kill ${bot.username}`)
   }
 
   // Debug packet IO when tests are re-run with "Enable debug logging" - https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables

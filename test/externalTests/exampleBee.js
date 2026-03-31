@@ -1,9 +1,9 @@
 const assert = require('assert')
+const { workspaceTest } = require('./plugins/descriptor')
 
-module.exports = () => async (bot) => {
+module.exports = () => workspaceTest(async (bot) => {
   await bot.test.runExample('examples/bee.js', async (name) => {
-    assert.strictEqual(name, 'bee')
-    bot.chat('/op bee') // to counteract spawn protection
+    bot.chat(`/op ${name}`) // to counteract spawn protection
     await bot.test.wait(2000)
     await bot.test.tellAndListen(name, 'fly', (message) => {
       if (message !== 'My flight was amazing !') {
@@ -11,5 +11,5 @@ module.exports = () => async (bot) => {
       }
       return true // stop listening
     })
-  })
-}
+  }, { namePrefix: 'bee' })
+}, { workspaceRadius: 12, exampleBot: true })

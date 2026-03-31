@@ -3,8 +3,8 @@
 const assert = require('assert')
 const mineflayer = require('../')
 const commonTest = require('./externalTests/plugins/testCommon')
+const { loadExternalTests } = require('./externalTests/plugins/loadTests')
 const mc = require('minecraft-protocol')
-const fs = require('fs')
 const path = require('path')
 
 const { getPort } = require('./common/util')
@@ -139,29 +139,16 @@ for (const supportedVersion of mineflayer.testedVersions) {
     })
 
     const externalTestsFolder = path.resolve(__dirname, './externalTests')
-    fs.readdirSync(externalTestsFolder)
-      .filter(file => fs.statSync(path.join(externalTestsFolder, file)).isFile())
-      .forEach((test) => {
-        test = path.basename(test, '.js')
-        const testFunctions = require(`./externalTests/${test}`)(supportedVersion)
-        const runTest = (testName, testFunction) => {
-          return function (done) {
-            this.timeout(TEST_TIMEOUT_MS)
-            bot.test.sayEverywhere(`### Starting ${testName}`)
-            testFunction(bot, done).then(res => done()).catch(e => done(e))
-          }
-        }
-        if (excludedTests.indexOf(test) === -1) {
-          if (typeof testFunctions === 'object') {
-            for (const testFunctionName in testFunctions) {
-              if (testFunctions[testFunctionName] !== undefined) {
-                it(`${test} ${testFunctionName}`, (testFunctionName => runTest(`${test} ${testFunctionName}`, testFunctions[testFunctionName]))(testFunctionName))
-              }
-            }
-          } else {
-            it(test, runTest(test, testFunctions))
-          }
-        }
+    for (const test of loadExternalTests({
+      externalTestsFolder,
+      supportedVersion,
+      excludedTests
+    })) {
+      it(test.name, function (done) {
+        this.timeout(TEST_TIMEOUT_MS)
+        bot.test.sayEverywhere(`### Starting ${test.name}`)
+        test.run(bot).then(() => done()).catch(done)
       })
+    }
   })
 }

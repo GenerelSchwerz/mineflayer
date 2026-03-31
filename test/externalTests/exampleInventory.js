@@ -1,4 +1,5 @@
 const assert = require('assert')
+const { workspaceTest } = require('./plugins/descriptor')
 
 const tests = [
   {
@@ -46,33 +47,35 @@ const tests = [
     wantedMessage: 'ladder x 3, diamond_boots x 1'
   }
 ]
-module.exports = () => async (bot) => {
+module.exports = () => workspaceTest(async (bot) => {
+  const exampleHome = bot.test.toWorld(0, 0, 0)
   await bot.test.runExample('examples/inventory.js', async (name) => {
-    assert.strictEqual(name, 'inventory')
-    bot.chat('/op inventory') // to counteract spawn protection
-    bot.chat('/clear inventory')
-    bot.chat(`/setblock 52 ${bot.test.groundY} 0 crafting_table`) // to make stone bricks stairs
-    bot.chat('/give inventory dirt 64')
-    bot.chat('/give inventory stick 7')
-    bot.chat('/give inventory iron_ore 64')
-    bot.chat('/give inventory diamond_boots 1')
+    const plannedTests = tests.slice()
+    bot.chat(`/op ${name}`) // to counteract spawn protection
+    bot.chat(`/clear ${name}`)
+    const craftingTablePos = bot.test.toWorld(1, 0, 0)
+    bot.chat(`/setblock ${craftingTablePos.x} ${craftingTablePos.y} ${craftingTablePos.z} crafting_table`)
+    bot.chat(`/give ${name} dirt 64`)
+    bot.chat(`/give ${name} stick 7`)
+    bot.chat(`/give ${name} iron_ore 64`)
+    bot.chat(`/give ${name} diamond_boots 1`)
     await bot.test.wait(2000)
     if (bot.registry.isOlderThan('1.9')) {
-      tests.splice(tests.indexOf(tests.find(t => t.command.includes('off-hand'))), 2) // Delete off-hand command and the command after it as they don't work in 1.9
+      plannedTests.splice(plannedTests.indexOf(plannedTests.find(t => t.command.includes('off-hand'))), 2) // Delete off-hand command and the command after it as they don't work in 1.9
     }
-    const testFuncs = tests.map(test => makeTest(test.command, test.wantedMessage))
+    const testFuncs = plannedTests.map(test => makeTest(test.command, test.wantedMessage))
     for (const test of testFuncs) {
       await test()
       await bot.test.wait(100)
     }
     // cleanup
-    bot.chat(`/setblock 52 ${bot.test.groundY} 0 air`)
+    bot.chat(`/setblock ${craftingTablePos.x} ${craftingTablePos.y} ${craftingTablePos.z} air`)
 
     function makeTest (inStr, outStr) {
       return () => bot.test.tellAndListen(name, inStr, makeListener(outStr))
     }
-  })
-}
+  }, { namePrefix: 'inventory', targetPosition: exampleHome })
+}, { workspaceRadius: 12, exampleBot: true })
 
 function makeListener (wantedMessage) {
   return (message) => {

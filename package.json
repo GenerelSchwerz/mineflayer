@@ -6,6 +6,7 @@
   "types": "index.d.ts",
   "scripts": {
     "mocha_test": "mocha --reporter spec --exit",
+    "test:external:parallel": "mocha test/externalParallelTest.js --reporter spec --exit",
     "test": "npm run mocha_test",
     "pretest": "npm run lint",
     "lint": "standard && standard-markdown",

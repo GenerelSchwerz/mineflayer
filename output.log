@@ -1,0 +1,215 @@
+[36mParallel external excluded tests: ["digEverything","book","anvil","placeEntity"][0m
+
+
+  mineflayer_external_parallel 1.21.4v
+[36mParallel port chosen (1.21.4): 42089[0m
+[90mStarting net.minecraft.server.Main[0m
+[90mWARNING: A restricted method in java.lang.System has been called[0m
+[90mWARNING: java.lang.System::load has been called by com.sun.jna.Native in an unnamed module (file:/home/genpc/github_stuff/mineflayer/test/server_parallel_1.21.4/libraries/net/java/dev/jna/jna/5.15.0/jna-5.15.0.jar)[0m
+[90mWARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module[0m
+[90mWARNING: Restricted methods will be blocked in a future release unless native access is enabled[0m
+[90m[0m
+[90mWARNING: A terminally deprecated method in sun.misc.Unsafe has been called[0m
+[90mWARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.joml.MemUtil$MemUtilUnsafe (file:/home/genpc/github_stuff/mineflayer/test/server_parallel_1.21.4/libraries/org/joml/joml/1.10.8/joml-1.10.8.jar)[0m
+[90mWARNING: Please consider reporting this to the maintainers of class org.joml.MemUtil$MemUtilUnsafe[0m
+[90mWARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release[0m
+[90m[21:36:13] [ServerMain/INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD][0m
+[90m[21:36:15] [ServerMain/INFO]: No existing world data, creating new world[0m
+[90m[21:36:15] [ServerMain/ERROR]: No key layers in MapLike[{}][0m
+[90m[21:36:16] [ServerMain/INFO]: Loaded 1370 recipes[0m
+[90m[21:36:16] [ServerMain/INFO]: Loaded 1481 advancements[0m
+[90m[21:36:16] [Server thread/INFO]: Starting minecraft server version 1.21.4[0m
+[90m[21:36:16] [Server thread/INFO]: Loading properties[0m
+[90m[21:36:16] [Server thread/INFO]: Default game type: CREATIVE[0m
+[90m[21:36:16] [Server thread/INFO]: Generating keypair[0m
+[90m[21:36:16] [Server thread/INFO]: Starting Minecraft server on *:42089[0m
+[90m[21:36:16] [Server thread/INFO]: Using default channel type[0m
+[90m[21:36:16] [Server thread/WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE![0m
+[90m[21:36:16] [Server thread/WARN]: The server will make no attempt to authenticate usernames. Beware.[0m
+[90m[21:36:16] [Server thread/WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.[0m
+[90m[21:36:16] [Server thread/WARN]: To change this, set "online-mode" to "true" in the server.properties file.[0m
+[90m[21:36:16] [Server thread/INFO]: Preparing level "world"[0m
+[90m[21:36:17] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld[0m
+[90m[21:36:17] [Worker-Main-1/INFO]: Preparing spawn area: 2%[0m
+[90m[21:36:17] [Server thread/INFO]: Time elapsed: 401 ms[0m
+[90m[21:36:17] [Server thread/INFO]: Done (1.110s)! For help, type "help"[0m
+[33m[scheduler] preflight: skipped workspace isolation check[0m
+[33m[scheduler] launching: digAndBuild[0m
+[33m[scheduler] active: none[0m
+[33m[scheduler] next: exampleBee, exampleDigger, exampleInventory, useChests[0m
+[33m[scheduler] remaining: 4[0m
+[33m[scheduler] connected bots: 0[0m
+[bot 1.21.4_0_digandbu0] version 1.21.4
+[33m[scheduler] launching: exampleBee[0m
+[33m[scheduler] active: digAndBuild[0m
+[33m[scheduler] next: exampleDigger, exampleInventory, useChests[0m
+[33m[scheduler] remaining: 3[0m
+[33m[scheduler] connected bots: 0[0m
+[bot 1.21.4_1_exampleb1] version 1.21.4
+[33m[scheduler] launching: exampleDigger[0m
+[33m[scheduler] active: digAndBuild, exampleBee[0m
+[33m[scheduler] next: exampleInventory, useChests[0m
+[33m[scheduler] remaining: 2[0m
+[33m[scheduler] connected bots: 0[0m
+[bot 1.21.4_2_exampled2] version 1.21.4
+[33m[scheduler] launching: exampleInventory[0m
+[33m[scheduler] active: digAndBuild, exampleBee, exampleDigger[0m
+[33m[scheduler] next: useChests[0m
+[33m[scheduler] remaining: 1[0m
+[33m[scheduler] connected bots: 0[0m
+[bot 1.21.4_3_examplei3] version 1.21.4
+[90m[21:36:18] [Server thread/INFO]: exampled2[/127.0.0.1:32920] logged in with entity id 1 at (-5.5, -60.0, -7.5)[0m
+[90m[21:36:18] [Server thread/INFO]: exampled2 joined the game[0m
+[90m[21:36:19] [Server thread/INFO]: digandbu0[/127.0.0.1:32894] logged in with entity id 2 at (-6.5, -60.0, -2.5)[0m
+[90m[21:36:19] [Server thread/INFO]: digandbu0 joined the game[0m
+[90m[21:36:19] [Server thread/INFO]: Made exampled2 a server operator[0m
+[90m[21:36:19] [Server thread/INFO]: Made digandbu0 a server operator[0m
+### Starting exampleDigger
+### Starting digAndBuild
+[90m[21:36:19] [Server thread/INFO]: examplei3[/127.0.0.1:32930] logged in with entity id 3 at (0.5, -60.0, 7.5)[0m
+[90m[21:36:19] [Server thread/INFO]: examplei3 joined the game[0m
+[90m[21:36:20] [Server thread/INFO]: exampleb1[/127.0.0.1:32904] logged in with entity id 4 at (-1.5, -60.0, -6.5)[0m
+[90m[21:36:20] [Server thread/INFO]: exampleb1 joined the game[0m
+[90m[21:36:20] [Server thread/INFO]: [exampled2: Set own game mode to Survival Mode][0m
+[90m[21:36:20] [Server thread/INFO]: [exampled2: Set own game mode to Creative Mode][0m
+[90m[21:36:20] [Server thread/INFO]: [digandbu0: Set own game mode to Survival Mode][0m
+[90m[21:36:20] [Server thread/INFO]: [digandbu0: Set own game mode to Creative Mode][0m
+[90m[21:36:20] [Server thread/INFO]: [Not Secure] <exampled2> ### Starting exampleDigger[0m
+[90m[21:36:20] [Server thread/INFO]: [Not Secure] <digandbu0> ### Starting digAndBuild[0m
+[90m[21:36:20] [Server thread/INFO]: Made exampleb1 a server operator[0m
+[90m[21:36:20] [Server thread/INFO]: Made examplei3 a server operator[0m
+### Starting exampleInventory
+### Starting exampleBee
+[90m[21:36:20] [Server thread/INFO]: [examplei3: Set own game mode to Survival Mode][0m
+[90m[21:36:20] [Server thread/INFO]: [examplei3: Set own game mode to Creative Mode][0m
+[90m[21:36:20] [Server thread/INFO]: [Not Secure] <examplei3> ### Starting exampleInventory[0m
+[90m[21:36:20] [Server thread/INFO]: [exampleb1: Set own game mode to Survival Mode][0m
+[90m[21:36:20] [Server thread/INFO]: [exampleb1: Set own game mode to Creative Mode][0m
+[90m[21:36:20] [Server thread/INFO]: [Not Secure] <exampleb1> ### Starting exampleBee[0m
+[90m[21:36:20] [Server thread/INFO]: [exampled2: Gave 1 [Stone] to exampled2][0m
+[90m[21:36:20] [Server thread/INFO]: [digandbu0: Gave 1 [Stone] to digandbu0][0m
+[90m[21:36:20] [Server thread/INFO]: [exampled2: Removed 1 item(s) from player exampled2][0m
+[90m[21:36:20] [Server thread/INFO]: [digandbu0: Removed 1 item(s) from player digandbu0][0m
+/execute in overworld run teleport exampled2 0 -60 256
+/execute in overworld run teleport digandbu0 0 -60 0
+[90m[21:36:20] [Server thread/INFO]: [exampled2: Teleported exampled2 to 0.500000, -60.000000, 256.500000][0m
+[90m[21:36:20] [Server thread/INFO]: [digandbu0: Teleported digandbu0 to 0.500000, -60.000000, 0.500000][0m
+[90m[21:36:21] [Server thread/INFO]: [examplei3: Gave 1 [Stone] to examplei3][0m
+[90m[21:36:21] [Server thread/INFO]: [exampleb1: Gave 1 [Stone] to exampleb1][0m
+[90m[21:36:21] [Server thread/INFO]: [examplei3: Removed 1 item(s) from player examplei3][0m
+[90m[21:36:21] [Server thread/INFO]: [exampleb1: Removed 1 item(s) from player exampleb1][0m
+/execute in overworld run teleport examplei3 256 -60 256
+/execute in overworld run teleport exampleb1 256 -60 0
+[90m[21:36:21] [Server thread/INFO]: [examplei3: Teleported examplei3 to 256.500000, -60.000000, 256.500000][0m
+[90m[21:36:21] [Server thread/INFO]: [exampleb1: Teleported exampleb1 to 256.500000, -60.000000, 0.500000][0m
+[90m[21:36:22] [Server thread/INFO]: [digandbu0: Gave 1 [Stone] to digandbu0][0m
+[90m[21:36:22] [Server thread/INFO]: [digandbu0: Removed 1 item(s) from player digandbu0][0m
+Vec3 { x: 0.5, y: -58, z: 0.5 }
+[90m[21:36:25] [Server thread/INFO]: [digandbu0: Gave 1 [Stone] to digandbu0][0m
+[90m[21:36:25] [Server thread/INFO]: [digandbu0: Removed 2 item(s) from player digandbu0][0m
+TEST
+TEST
+TEST
+TEST
+TEST
+TEST
+[90m[21:36:25] [Server thread/INFO]: [digandbu0: Set own game mode to Survival Mode][0m
+[90m[21:36:25] [Server thread/INFO]: [digandbu0: Set own game mode to Creative Mode][0m
+[90m[21:36:25] [Server thread/INFO]: [digandbu0: Set own game mode to Survival Mode][0m
+dirt collect test: pass
+[90m[21:36:27] [Server thread/INFO]: [Not Secure] <digandbu0> dirt collect test: pass[0m
+[33m[scheduler] cleared: digAndBuild[0m
+[33m[scheduler] active: exampleBee, exampleDigger, exampleInventory[0m
+[33m[scheduler] next: useChests[0m
+[33m[scheduler] remaining: 1[0m
+[33m[scheduler] connected bots: 3[0m
+[33m[scheduler] launching: useChests[0m
+[33m[scheduler] active: exampleBee, exampleDigger, exampleInventory[0m
+[33m[scheduler] next: none[0m
+[33m[scheduler] remaining: 0[0m
+[33m[scheduler] connected bots: 3[0m
+[bot 1.21.4_0_usechest4] version 1.21.4
+[90m[21:36:27] [Server thread/INFO]: digandbu0 lost connection: Disconnected[0m
+[90m[21:36:27] [Server thread/INFO]: digandbu0 left the game[0m
+[90m[21:36:27] [Server thread/INFO]: usechest4[/127.0.0.1:52016] logged in with entity id 12 at (-5.5, -60.0, -1.5)[0m
+[90m[21:36:27] [Server thread/INFO]: usechest4 joined the game[0m
+[90m[21:36:27] [Server thread/INFO]: Made usechest4 a server operator[0m
+### Starting useChests
+[90m[21:36:27] [Server thread/INFO]: [usechest4: Set own game mode to Survival Mode][0m
+[90m[21:36:27] [Server thread/INFO]: [usechest4: Set own game mode to Creative Mode][0m
+[90m[21:36:27] [Server thread/INFO]: [Not Secure] <usechest4> ### Starting useChests[0m
+[90m[21:36:28] [Server thread/INFO]: [usechest4: Gave 1 [Stone] to usechest4][0m
+[90m[21:36:28] [Server thread/INFO]: [usechest4: Removed 1 item(s) from player usechest4][0m
+/execute in overworld run teleport usechest4 0 -60 0
+[90m[21:36:28] [Server thread/INFO]: [usechest4: Teleported usechest4 to 0.500000, -60.000000, 0.500000][0m
+[90m[21:36:30] [Server thread/INFO]: [usechest4: Gave 1 [Stone] to usechest4][0m
+[90m[21:36:30] [Server thread/INFO]: [usechest4: Removed 1 item(s) from player usechest4][0m
+[90m[21:36:31] [Server thread/INFO]: [usechest4: Set own game mode to Survival Mode][0m
+[90m[21:36:31] [Server thread/INFO]: [usechest4: Set own game mode to Creative Mode][0m
+[90m[21:36:31] [Server thread/INFO]: [usechest4: Set own game mode to Survival Mode][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Set own game mode to Creative Mode][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Set own game mode to Survival Mode][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Set own game mode to Creative Mode][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Gave 61 [Stone] to usechest4][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Gave 51 [Stone] to usechest4][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Gave 6 [Stone] to usechest4][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Gave 25 [Mycelium] to usechest4][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Gave 49 [Mycelium] to usechest4][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Gave 27 [Stone] to usechest4][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Gave 59 [Mycelium] to usechest4][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Gave 9 [Mycelium] to usechest4][0m
+[90m[21:36:49] [Server thread/INFO]: [usechest4: Gave 35 [Stone] to usechest4][0m
+[90m[21:36:50] [Server thread/INFO]: [usechest4: Gave 11 [Egg] to usechest4][0m
+[90m[21:36:50] [Server thread/INFO]: [usechest4: Gave 3 [Egg] to usechest4][0m
+[90m[21:36:50] [Server thread/INFO]: [usechest4: Gave 29 [Stone] to usechest4][0m
+[90m[21:36:50] [Server thread/INFO]: [usechest4: Gave 1 [Bow] to usechest4][0m
+[90m[21:36:50] [Server thread/INFO]: [usechest4: Gave 26 [Mycelium] to usechest4][0m
+[90m[21:36:50] [Server thread/INFO]: [usechest4: Gave 1 [Bow] to usechest4][0m
+[90m[21:36:50] [Server thread/INFO]: [usechest4: Gave 14 [Mycelium] to usechest4][0m
+[90m[21:36:50] [Server thread/INFO]: [usechest4: Gave 1 [Bow] to usechest4][0m
+[90m[21:36:50] [Server thread/INFO]: [usechest4: Gave 52 [Stone] to usechest4][0m
+[90m[21:36:50] [Server thread/INFO]: [usechest4: Gave 51 [Stone] to usechest4][0m
+[90m[21:36:51] [Server thread/INFO]: [usechest4: Gave 4 [Mycelium] to usechest4][0m
+[90m[21:36:51] [Server thread/INFO]: [usechest4: Gave 49 [Mycelium] to usechest4][0m
+[90m[21:36:51] [Server thread/INFO]: [usechest4: Gave 49 [Stone] to usechest4][0m
+[90m[21:36:51] [Server thread/INFO]: [usechest4: Gave 11 [Mycelium] to usechest4][0m
+[90m[21:36:51] [Server thread/INFO]: [usechest4: Gave 15 [Stone] to usechest4][0m
+[90m[21:36:51] [Server thread/INFO]: [usechest4: Gave 1 [Bow] to usechest4][0m
+[90m[21:36:51] [Server thread/INFO]: [usechest4: Gave 11 [Mycelium] to usechest4][0m
+[90m[21:36:51] [Server thread/INFO]: [usechest4: Gave 1 [Bow] to usechest4][0m
+[90m[21:36:51] [Server thread/INFO]: [usechest4: Gave 43 [Mycelium] to usechest4][0m
+[90m[21:36:52] [Server thread/INFO]: [usechest4: Gave 56 [Stone] to usechest4][0m
+[90m[21:36:52] [Server thread/INFO]: [usechest4: Gave 45 [Mycelium] to usechest4][0m
+[90m[21:36:52] [Server thread/INFO]: [usechest4: Gave 34 [Mycelium] to usechest4][0m
+[90m[21:36:52] [Server thread/INFO]: [usechest4: Gave 23 [Mycelium] to usechest4][0m
+[90m[21:36:52] [Server thread/INFO]: [usechest4: Gave 1 [Bow] to usechest4][0m
+[90m[21:36:52] [Server thread/INFO]: [usechest4: Gave 9 [Mycelium] to usechest4][0m
+[90m[21:36:52] [Server thread/INFO]: [usechest4: Gave 1 [Bow] to usechest4][0m
+[90m[21:36:52] [Server thread/INFO]: [usechest4: Gave 39 [Mycelium] to usechest4][0m
+[90m[21:36:52] [Server thread/INFO]: [usechest4: Gave 4 [Egg] to usechest4][0m
+[90m[21:36:53] [Server thread/INFO]: [usechest4: Gave 11 [Ender Pearl] to usechest4][0m
+[90m[21:36:53] [Server thread/INFO]: [usechest4: Gave 10 [Stone] to usechest4][0m
+[90m[21:36:53] [Server thread/INFO]: [usechest4: Gave 60 [Stone] to usechest4][0m
+[90m[21:36:53] [Server thread/INFO]: [usechest4: Gave 13 [Mycelium] to usechest4][0m
+[90m[21:36:53] [Server thread/INFO]: [usechest4: Gave 23 [Stone] to usechest4][0m
+[90m[21:36:53] [Server thread/INFO]: [usechest4: Gave 18 [Mycelium] to usechest4][0m
+[90m[21:36:53] [Server thread/INFO]: [usechest4: Gave 10 [Mycelium] to usechest4][0m
+[90m[21:36:53] [Server thread/INFO]: [usechest4: Gave 1 [Fishing Rod] to usechest4][0m
+[90m[21:36:53] [Server thread/INFO]: [usechest4: Gave 18 [Mycelium] to usechest4][0m
+[90m[21:36:53] [Server thread/INFO]: [usechest4: Gave 20 [Stone] to usechest4][0m
+[90m[21:36:54] [Server thread/INFO]: [usechest4: Gave 50 [Mycelium] to usechest4][0m
+[90m[21:36:54] [Server thread/INFO]: [usechest4: Gave 59 [Stone] to usechest4][0m
+[90m[21:36:54] [Server thread/INFO]: [usechest4: Gave 58 [Mycelium] to usechest4][0m
+[90m[21:36:54] [Server thread/INFO]: [usechest4: Gave 51 [Mycelium] to usechest4][0m
+[90m[21:36:54] [Server thread/INFO]: [usechest4: Gave 48 [Stone] to usechest4][0m
+[90m[21:36:54] [Server thread/INFO]: [usechest4: Gave 35 [Mycelium] to usechest4][0m
+[90m[21:36:54] [Server thread/INFO]: [usechest4: Set own game mode to Survival Mode][0m
+[90m[21:36:54] [Server thread/INFO]: [usechest4: Set own game mode to Creative Mode][0m
+[90m[21:36:54] [Server thread/INFO]: [usechest4: Set own game mode to Survival Mode][0m
+[33m[scheduler] cleared: useChests[0m
+[33m[scheduler] active: exampleBee, exampleDigger, exampleInventory[0m
+[33m[scheduler] next: none[0m
+[33m[scheduler] remaining: 0[0m
+[33m[scheduler] connected bots: 3[0m
+[90m[21:36:54] [Server thread/INFO]: usechest4 lost connection: Disconnected[0m
+[90m[21:36:54] [Server thread/INFO]: usechest4 left the game[0m

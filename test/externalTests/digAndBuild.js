@@ -1,7 +1,8 @@
 const { Vec3 } = require('vec3')
 const assert = require('assert')
+const { workspaceTest } = require('./plugins/descriptor')
 
-module.exports = () => async (bot) => {
+module.exports = () => workspaceTest(async (bot) => {
   const Item = require('prismarine-item')(bot.registry)
 
   await bot.test.setInventorySlot(36, new Item(bot.registry.itemsByName.dirt.id, 1, 0))
@@ -34,4 +35,4 @@ module.exports = () => async (bot) => {
       })
     })
   }
-}
+}, { workspaceRadius: 8 })

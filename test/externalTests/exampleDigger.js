@@ -1,10 +1,10 @@
 const assert = require('assert')
+const { workspaceTest } = require('./plugins/descriptor')
 
-module.exports = () => async (bot) => {
+module.exports = () => workspaceTest(async (bot) => {
   await bot.test.runExample('examples/digger.js', async (name) => {
-    assert.strictEqual(name, 'digger')
-    bot.chat('/op digger') // to counteract spawn protection
-    bot.chat('/give digger dirt 64')
+    bot.chat(`/op ${name}`) // to counteract spawn protection
+    bot.chat(`/give ${name} dirt 64`)
     await bot.test.wait(2000)
     await bot.test.tellAndListen(name, 'dig', (message) => {
       if (message.startsWith('starting')) {
@@ -26,5 +26,5 @@ module.exports = () => async (bot) => {
       }
       return true // stop listening
     })
-  })
-}
+  }, { namePrefix: 'digger' })
+}, { workspaceRadius: 12, exampleBot: true })

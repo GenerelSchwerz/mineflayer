@@ -1,8 +1,8 @@
-const { Vec3 } = require('vec3')
 const assert = require('assert')
 const { once, onceWithCleanup } = require('../../lib/promise_utils')
+const { workspaceTest } = require('./plugins/descriptor')
 
-module.exports = () => async (bot) => {
+module.exports = () => workspaceTest(async (bot) => {
   const Item = require('prismarine-item')(bot.registry)
   const oldYawSpeed = bot.physics.yawSpeed
   const oldPitchSpeed = bot.physics.pitchSpeed
@@ -13,12 +13,12 @@ module.exports = () => async (bot) => {
   try {
     bot.test.groundY = bot.supportFeature('tallWorld') ? -60 : 4
 
-    const smallChestLocation = new Vec3(0, bot.test.groundY, -1)
-    const largeChestLocations = [new Vec3(0, bot.test.groundY, 1), new Vec3(1, bot.test.groundY, 1)]
-    const smallTrappedChestLocation = new Vec3(1, bot.test.groundY, 0)
+    const smallChestLocation = bot.test.toWorld(0, 0, -1)
+    const largeChestLocations = [bot.test.toWorld(0, 0, 1), bot.test.toWorld(1, 0, 1)]
+    const smallTrappedChestLocation = bot.test.toWorld(1, 0, 0)
     const largeTrappedChestLocations = [
-      new Vec3(-1, bot.test.groundY, 1),
-      new Vec3(-1, bot.test.groundY, 0)
+      bot.test.toWorld(-1, 0, 1),
+      bot.test.toWorld(-1, 0, 0)
     ]
     const chestSlot = 36
     const trappedChestSlot = 37
@@ -195,4 +195,4 @@ module.exports = () => async (bot) => {
     bot.physics.yawSpeed = oldYawSpeed
     bot.physics.pitchSpeed = oldPitchSpeed
   }
-}
+}, { workspaceRadius: 10 })
