@@ -10,12 +10,16 @@ const { sleep, onceWithCleanup } = require('../../../lib/promise_utils')
 const timeout = 20000
 module.exports = inject
 
-function inject (bot, options = {}) {
+function inject (bot, wrapOrOptions = {}) {
+  const options = normalizeOptions(wrapOrOptions)
+  const wrap = options.wrap
   const botId = options.id ?? bot.username
   logExternal('bot', `[bot ${botId}] version ${bot.version}`)
 
   const defaultGroundY = bot.supportFeature('tallWorld') ? -60 : 4
-  const defaultOrigin = options.origin ? new Vec3(options.origin.x, options.origin.y, options.origin.z) : new Vec3(0, defaultGroundY, 0)
+  const defaultOrigin = options.origin
+    ? new Vec3(options.origin.x, options.origin.y, options.origin.z)
+    : new Vec3(0, defaultGroundY, 0)
   const defaultWorkspaceSize = options.workspaceSize ?? 48
   const defaultWorkspaceRadius = options.workspaceRadius ?? 8
   let workspaceIdCounter = 0
@@ -59,15 +63,14 @@ function inject (bot, options = {}) {
   bot.test.awaitItemReceived = async (command) => {
     const p = once(bot.inventory, 'updateSlot')
     bot.chat(command)
-    await p // await getting the item
+    await p
   }
-  // setting relative to true makes x, y, & z relative using ~
+
   bot.test.setBlock = async ({ x = 0, y = 0, z = 0, relative, blockName }) => {
     const position = relative ? bot.entity.position.floored().offset(x, y, z) : new Vec3(x, y, z)
     const block = bot.blockAt(position)
-    if (block.name === blockName) {
-      return
-    }
+    if (block.name === blockName) return
+
     const p = once(bot.world, `blockUpdate:(${position.x}, ${position.y}, ${position.z})`)
     const prefix = relative ? '~' : ''
     bot.chat(`/setblock ${prefix}${x} ${prefix}${y} ${prefix}${z} ${blockName}`)
@@ -108,12 +111,10 @@ function inject (bot, options = {}) {
 
   async function placeBlock (slot, position) {
     bot.setQuickBarSlot(slot - 36)
-    // always place the block on the top of the block below it, i guess.
     const referenceBlock = bot.blockAt(position.plus(new Vec3(0, -1, 0)))
     return bot.placeBlock(referenceBlock, new Vec3(0, 1, 0))
   }
 
-  // always leaves you in creative mode
   async function resetState () {
     logExternal('trace', `[trace ${bot.username}] resetState: start`)
     await becomeCreative()
@@ -127,14 +128,12 @@ function inject (bot, options = {}) {
     logExternal('trace', `[trace ${bot.username}] resetState: chunks loaded`)
     await resetBlocksToSuperflat()
     logExternal('trace', `[trace ${bot.username}] resetState: workspace reset`)
-    await sleep(1000)
     await clearInventory()
     logExternal('trace', `[trace ${bot.username}] resetState: inventory cleared (pass 2)`)
     logExternal('trace', `[trace ${bot.username}] resetState: complete`)
   }
 
   async function becomeCreative () {
-    // console.log('become creative')
     return setCreativeMode(true)
   }
 
@@ -142,48 +141,50 @@ function inject (bot, options = {}) {
     return setCreativeMode(false)
   }
 
-  const gameModeChangedMessages = ['commands.gamemode.success.self', 'gameMode.changed']
-
   async function setCreativeMode (value) {
-    const getGM = val => val ? 'creative' : 'survival'
-    // this function behaves the same whether we start in creative mode or not.
-    // also, creative mode is always allowed for ops, even if server.properties says force-gamemode=true in survival mode.
-    let i = 0
-    const msgProm = onceWithCleanup(bot, 'message', {
+    const mode = value ? 'creative' : 'survival'
+    const modeId = value ? 1 : 0
+    if (bot.game.gameMode === mode) return
+
+    const gameModePromise = onceWithCleanup(bot._client, 'game_state_change', {
       timeout,
-      checkCondition: msg => gameModeChangedMessages.includes(msg.translate) && i++ > 0 && bot.game.gameMode === getGM(value)
+      checkCondition: (packet) => {
+        const isGameModeChange = packet.reason === 3 || packet.reason === 'change_game_mode'
+        return isGameModeChange && Math.floor(packet.gameMode) === modeId
+      }
     })
 
-    // do it three times to ensure that we get feedback
-    bot.chat(`/gamemode ${getGM(value)} ${bot.username}`)
-    bot.chat(`/gamemode ${getGM(!value)} ${bot.username}`)
-    bot.chat(`/gamemode ${getGM(value)} ${bot.username}`)
-    return msgProm
+    if (wrap) {
+      wrap.writeServer(`gamemode ${mode} ${bot.username}\n`)
+    } else {
+      bot.chat(`/gamemode ${mode} ${bot.username}`)
+    }
+
+    await gameModePromise
   }
 
   async function clearInventory () {
-    const giveStone = onceWithCleanup(bot.inventory, 'updateSlot', { timeout: 1000 * 20, checkCondition: (slot, oldItem, newItem) => newItem?.name === 'stone' })
-    await bot.test.wait(500)
-    bot.chat(`/give ${bot.username} stone 1`)
-    bot.inventory.on('updateSlot', (...e) => {
-      // console.log('inventory.updateSlot', e)
+    const giveStone = onceWithCleanup(bot.inventory, 'updateSlot', {
+      timeout,
+      checkCondition: (slot, oldItem, newItem) => newItem?.name === 'stone'
     })
+    bot.chat(`/give ${bot.username} stone 1`)
     await giveStone
 
-    const clearInv = onceWithCleanup(bot, 'message', {
+    const clearMsg = onceWithCleanup(bot, 'message', {
       timeout,
       checkCondition: msg => msg.translate === 'commands.clear.success.single' || msg.translate === 'commands.clear.success'
     })
-    bot.chat(`/clear ${bot.username}`) // don't rely on the message (as it'll come too early), wait for the result of /clear instead
-    await clearInv
+    bot.chat(`/clear ${bot.username}`)
+    await clearMsg
 
-    // Check that the inventory is clear
     for (const slot of bot.inventory.slots) {
-      if (slot && slot.itemCount <= 0) throw new Error('Inventory was not cleared: ' + JSON.stringify(bot.inventory.slots))
+      if (slot && slot.itemCount <= 0) {
+        throw new Error('Inventory was not cleared: ' + JSON.stringify(bot.inventory.slots))
+      }
     }
   }
 
-  // you need to be in creative mode for this to work
   async function setInventorySlot (targetSlot, item) {
     assert(item === null || item.name !== 'unknown', `item should not be unknown ${JSON.stringify(item)}`)
     return bot.creative.setInventorySlot(targetSlot, item)
@@ -280,14 +281,10 @@ function inject (bot, options = {}) {
       })
       childBotName = message.json.with[0].insertion
       bot.chat(`/tp ${childBotName} ${childTarget.x} ${childTarget.y} ${childTarget.z}`)
-      // Wait for the child entity to arrive at the teleport target,
-      // confirming the server has processed the TP
       while (!bot.players[childBotName]?.entity ||
              bot.players[childBotName].entity.position.distanceTo(childTarget) > 5) {
         await sleep(100)
       }
-      // Let the child's physics engine initialize at the new position
-      // (ground detection, chunk processing) before starting the test
       await bot.waitForTicks(60)
       bot.chat('loaded')
     }
@@ -301,7 +298,6 @@ function inject (bot, options = {}) {
 
     const child = spawn('node', [file, '127.0.0.1', `${bot.test.port}`, requestedName])
 
-    // Useful to debug child processes:
     child.stdout.on('data', (data) => { console.log(`${data}`) })
     child.stderr.on('data', (data) => { console.error(`${data}`) })
 
@@ -317,14 +313,9 @@ function inject (bot, options = {}) {
         console.log('process termination failed, process may already be closed')
       }
 
-      if (err) {
-        throw err
-      }
+      if (err) throw err
     }
 
-    // Let mocha's test-level timeout (90s) be the backstop instead of
-    // an inner withTimeout, which was causing premature failures on
-    // slow CI runners.
     try {
       await Promise.all([detectChildJoin(), runExampleOnReady()])
     } catch (err) {
@@ -338,7 +329,6 @@ function inject (bot, options = {}) {
     bot.chat(`/kill ${bot.username}`)
   }
 
-  // Debug packet IO when tests are re-run with "Enable debug logging" - https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables
   if (process.env.RUNNER_DEBUG) {
     bot._client.on('packet', function (data, meta) {
       if (['chunk', 'time', 'light', 'alive'].some(e => meta.name.includes(e))) return
@@ -350,8 +340,21 @@ function inject (bot, options = {}) {
       console.log('<-', name, JSON.stringify(data)?.slice(0, 250))
       oldWrite.apply(bot._client, arguments)
     }
-      BigInt.prototype.toJSON ??= function () { // eslint-disable-line
+    BigInt.prototype.toJSON ??= function () { // eslint-disable-line
       return this.toString()
     }
   }
+}
+
+function normalizeOptions (wrapOrOptions) {
+  if (
+    wrapOrOptions &&
+    typeof wrapOrOptions.writeServer === 'function' &&
+    !('origin' in wrapOrOptions) &&
+    !('workspaceSize' in wrapOrOptions) &&
+    !('id' in wrapOrOptions)
+  ) {
+    return { wrap: wrapOrOptions }
+  }
+  return wrapOrOptions ?? {}
 }

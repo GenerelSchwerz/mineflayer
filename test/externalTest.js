@@ -69,7 +69,7 @@ for (const supportedVersion of mineflayer.testedVersions) {
           host: '127.0.0.1',
           version: supportedVersion
         })
-        commonTest(bot)
+        commonTest(bot, { wrap })
         bot.test.port = PORT
 
         console.log('starting bot')
@@ -117,12 +117,6 @@ for (const supportedVersion of mineflayer.testedVersions) {
       } else begin()
     })
 
-    beforeEach(async () => {
-      console.log('Resetting state')
-      await bot.test.resetState()
-      console.log('State reset')
-    })
-
     after((done) => {
       if (bot) bot.quit()
       wrap.stopServer((err) => {
@@ -139,6 +133,7 @@ for (const supportedVersion of mineflayer.testedVersions) {
     })
 
     const externalTestsFolder = path.resolve(__dirname, './externalTests')
+    let distinctFailures = 0
     for (const test of loadExternalTests({
       externalTestsFolder,
       supportedVersion,
@@ -146,8 +141,23 @@ for (const supportedVersion of mineflayer.testedVersions) {
     })) {
       it(test.name, function (done) {
         this.timeout(TEST_TIMEOUT_MS)
-        bot.test.sayEverywhere(`### Starting ${test.name}`)
-        test.run(bot).then(() => done()).catch(done)
+        if (distinctFailures >= 3) this.retries(0)
+        if (this.test._currentRetry > 0) {
+          console.log(`  [retry ${this.test._currentRetry}] ${test.name}`)
+        }
+
+        bot.test.resetState()
+          .then(() => {
+            bot.test.sayEverywhere(`### Starting ${test.name}`)
+            return test.run(bot)
+          })
+          .then(() => done())
+          .catch((error) => {
+            if (this.test._currentRetry === 0) {
+              distinctFailures++
+            }
+            done(error)
+          })
       })
     }
   })
