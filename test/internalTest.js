@@ -4,6 +4,7 @@ const mineflayer = require('../')
 const vec3 = require('vec3')
 const mc = require('minecraft-protocol')
 const assert = require('assert')
+const { performance } = require('perf_hooks')
 const { sleep } = require('../lib/promise_utils')
 const nbt = require('prismarine-nbt')
 const { once } = require('../lib/promise_utils')
@@ -431,6 +432,85 @@ for (const supportedVersion of mineflayer.testedVersions) {
           })
         })
       })
+
+      // only required to run once, version agnostic.
+      if (supportedVersion === mineflayer.latestSupportedVersion) {
+        it('physicsTick intervals stay close to 50ms without event loop delay', function (done) {
+          this.timeout(8000)
+
+          const timestamps = []
+          let finished = false
+          const expectedInterval = 50
+          const maxExpectedInterval = 55
+          const sampleCount = 40
+          const warmupIntervals = 5
+
+          function finish (err) {
+            if (finished) return
+            finished = true
+            clearTimeout(timeout)
+            bot.removeListener('physicsTick', onPhysicsTick)
+            done(err)
+          }
+
+          function onPhysicsTick () {
+            timestamps.push(performance.now())
+
+            if (timestamps.length <= sampleCount + warmupIntervals) return
+            const intervals = timestamps.slice(1).map((time, index) => time - timestamps[index]).slice(warmupIntervals)
+            const formattedIntervals = intervals.map(interval => interval.toFixed(2)).join(', ')
+            const maxInterval = Math.max(...intervals)
+            const minInterval = Math.min(...intervals)
+            const averageInterval = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length
+
+            if (process.env.MINEFLAYER_DEBUG_PHYSICS_TICK) {
+              console.log(`physicsTick intervals: ${formattedIntervals}`)
+            }
+
+            try {
+              assert.ok(
+                maxInterval <= maxExpectedInterval,
+                `expected physicsTick intervals to stay close to ${expectedInterval}ms; min=${minInterval.toFixed(2)}ms avg=${averageInterval.toFixed(2)}ms max=${maxInterval.toFixed(2)}ms intervals=${formattedIntervals}`
+              )
+              finish()
+            } catch (err) {
+              finish(err)
+            }
+          }
+
+          const timeout = setTimeout(() => {
+            finish(new Error(`Timed out waiting for physicsTick samples, got ${timestamps.length}`))
+          }, 7000)
+
+          bot.on('physicsTick', onPhysicsTick)
+
+          server.on('playerJoin', async (client) => {
+            try {
+              await client.write('login', bot.test.generateLoginPacket())
+
+              const chunk = bot.test.buildChunk()
+              chunk.setBlockType(pos, goldId)
+              const chunkLoaded = once(bot, 'chunkColumnLoad')
+              await client.write('map_chunk', generateChunkPacket(chunk))
+              await chunkLoaded
+
+              const forcedMove = once(bot, 'forcedMove')
+              await client.write('position', {
+                x: 1.5,
+                y: 66,
+                z: 1.5,
+                pitch: 0,
+                yaw: 0,
+                flags: bot.supportFeature('positionPacketHasBitflags') ? { x: false, y: false, z: false, yaw: false, pitch: false } : 0,
+                teleportId: 0
+              })
+              await forcedMove
+            } catch (err) {
+              finish(err)
+            }
+          })
+        })
+      }
     })
 
     describe('world', () => {
