@@ -1,2 +1,4 @@
+minimumReleaseAgeExclude:
+  - '@nxg-org/mineflayer-physics-util@1.9.7'
 onlyBuiltDependencies:
   - minecraft-data
