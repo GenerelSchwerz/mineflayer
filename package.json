@@ -21,7 +21,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@nxg-org/mineflayer-physics-util": "^1.9.5",
+    "@nxg-org/mineflayer-physics-util": "^1.9.6",
     "minecraft-data": "^3.108.0",
     "minecraft-protocol": "^1.66.0",
     "mojangson": "^2.0.4",
