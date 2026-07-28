@@ -139,6 +139,8 @@
       - [bot.fireworkRocketDuration](#botfireworkrocketduration)
       - [bot.simpleClick.leftMouse (slot)](#botsimpleclickleftmouse-slot)
       - [bot.simpleClick.rightMouse (slot)](#botsimpleclickrightmouse-slot)
+      - [bot.simpleClick.shiftMouse (slot)](#botsimpleclickshiftmouse-slot)
+      - [bot.simpleClick.shiftDoubleClick (slot)](#botsimpleclickshiftdoubleclick-slot)
       - [bot.time.doDaylightCycle](#bottimedodaylightcycle)
       - [bot.time.bigTime](#bottimebigtime)
       - [bot.time.time](#bottimetime)
@@ -1055,6 +1057,15 @@ abstraction over `bot.clickWindow(slot, 0, 0)`
 #### bot.simpleClick.rightMouse (slot)
 
 abstraction over `bot.clickWindow(slot, 1, 0)`
+
+#### bot.simpleClick.shiftMouse (slot)
+
+Quick-moves the stack in `slot` between the two sides of the current window.
+
+#### bot.simpleClick.shiftDoubleClick (slot)
+
+With an item on the cursor, quick-moves every stack matching `slot` from the
+same side of the current window.
 
 #### bot.time.doDaylightCycle
 
@@ -2153,8 +2164,6 @@ mode support:
     - number clicks (2)
     - middle clicks (3)
     - drop clicks (4)
-
-  - unimplemented:
     - drag clicks (5)
     - double clicks (6)
 
